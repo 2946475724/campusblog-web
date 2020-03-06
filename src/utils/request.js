@@ -11,9 +11,9 @@ const service = axios.create({
 
 // request拦截器
 service.interceptors.request.use(config => {
-  if (store.getters.token) {
-    config.headers['Authorization'] = getToken() // 让每个请求携带自定义token 请根据实际情况自行修改
-  }
+  // if (store.getters.token) {
+  //   config.headers['Authorization'] = getToken() // 让每个请求携带自定义token 请根据实际情况自行修改
+  // }
   return config
 }, error => {
   // Do something with request error
@@ -21,7 +21,7 @@ service.interceptors.request.use(config => {
   Promise.reject(error)
 })
 
-// respone拦截器
+// response拦截器
 service.interceptors.response.use(
   response => {
     /**
@@ -30,7 +30,7 @@ service.interceptors.response.use(
     const res = response.data
     if (res.code !== 200) {
       Message({
-        message: res.message,
+        message: res.msg,
         type: 'error',
         duration: 3 * 1000
       })
@@ -55,7 +55,7 @@ service.interceptors.response.use(
   error => {
     console.log('err' + error)// for debug
     Message({
-      message: error.message,
+      message: error.msg,
       type: 'error',
       duration: 3 * 1000
     })

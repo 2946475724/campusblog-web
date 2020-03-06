@@ -16,9 +16,11 @@ import 'quill/dist/quill.bubble.css'
 
 import '@/icons' // 引入svg
 
+import '../static/css/index.css'
+
 import moment from 'moment'  //导入时间格式化组件
 //定义时间格式化全局过滤器
-Vue.filter('dateFormat', (dateStr, pattern='YYYY-MM-DD HH:mm:ss') => {
+Vue.filter('dateFormat', (dateStr, pattern='YYYY-MM-DD') => {
   return moment(dateStr).format(pattern)
 })
 
