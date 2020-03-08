@@ -37,18 +37,21 @@
       </div>
       <SideBar></SideBar>
     </div>
+    <ScrollTop></ScrollTop>
   </div>
 </template>
 
 <script>
   import Top from "../components/Top";
   import SideBar from "../components/SideBar";
+  import ScrollTop from '../components/ScrollTop';
   import { fetchList } from "@/api/article";
   export default {
     name: "index",
     components: {
       Top,
       SideBar,
+      ScrollTop,
     },
     data() {
       return {

@@ -3,8 +3,15 @@ import {
   SET_LOGIN_STATE,
   SET_TOKEN
 } from './mutation-types';
-import {login, logout} from '@/api/user'
-import { getToken, setToken, removeToken } from '@/utils/auth'
+import {
+  login,
+  logout
+} from '@/api/user'
+import {
+  getToken,
+  setToken,
+  removeToken
+} from '@/utils/auth'
 
 const user = {
   //全局状态
@@ -12,6 +19,16 @@ const user = {
     token: getToken(),
     userInfo: {},
     isLogin: false,
+  },
+
+  getters: {
+    getUserAvatar(state) {
+      if (state.isLogin && state.userInfo.icon != undefined) {
+        return state.userInfo.icon;
+      } else {
+        return "/static/images/default.jpg"
+      }
+    }
   },
 
   mutations: {
@@ -28,11 +45,13 @@ const user = {
 
   actions: {
     //登录
-    Login({commit}, userInfo) {
+    Login({
+      commit
+    }, userInfo) {
       const username = userInfo.username.trim();
       return new Promise((resolve, reject) => {
         login(username, userInfo.password).then(resp => {
-          const token = resp.data.tokenHead + resp.data.token;
+          const token = resp.data.token;
           setToken(token);
           commit('SET_TOKEN', token);
           commit('SET_USER_INFO', resp.data.userInfo);
@@ -41,11 +60,14 @@ const user = {
         }).catch(error => {
           reject(error);
         })
-      }) 
+      })
     },
 
     //登出
-    LogOut({commit, state}) {
+    LogOut({
+      commit,
+      state
+    }) {
       return new Promise((resolve, reject) => {
         logout(state.token).then(() => {
           commit('SET_TOKEN', '');

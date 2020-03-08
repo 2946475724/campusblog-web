@@ -11,6 +11,13 @@ export function login(username, password) {
   })
 }
 
+export function authVerify(params) {
+  return request({
+    url: '/auth/verify/' + params,
+    method: 'get',
+  })
+}
+
 export function logout() {
   return request({
     url: '/api/user/logout',

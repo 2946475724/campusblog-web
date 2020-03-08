@@ -8,18 +8,15 @@
             <h2 class="title">{{articleInfo.title}}</h2>
             <div class="article-content">{{articleInfo.content}}</div>
           </div>
-          <div class="comment">
-            <div class="comment-box">
-              <div class="user-avatar">
-                <img src="../../static/images/default.jpg"/>
-              </div>
-              <div class="editor">
-                <textarea class="editor-input" placeholder="说点什么吧..."></textarea>
-                <div class="post">
-                  <div class="right">
-                    <button class="btn submit">发布</button>
-                  </div>
-                </div>
+          <div class="comment" style="background-color: #fff;">
+            <!-- <sticky :sticky-top="60"> -->
+              <CommentBox :userInfo="userInfo" :commentInfo="commentInfo" @submit-box="submitBox"
+                :showCancel="showCancel"></CommentBox>
+            <!-- </sticky> -->
+            <div class="comment-list">
+              <CommentList :comments="comments" :commentInfo="commentInfo"></CommentList>
+              <div class="no-comment" v-if="comments.length ==0">
+                还没有评论，快来抢沙发吧！
               </div>
             </div>
           </div>
@@ -33,28 +30,88 @@
 <script>
   import Top from "../components/Top";  
   import SideBar from "../components/SideBar";
+  import CommentBox from '../components/CommentBox';
+  import CommentList from '../components/CommentList';
+  import Sticky from '../components/Sticky'
   import {getArticleById} from '@/api/article';
+  import {mapMutations} from 'vuex'
+  import {addComment, getCommentList} from "../api/comment";
+  import { Loading } from 'element-ui';
   export default {
     name: 'Info',
     components: {
       Top,
-      SideBar
+      SideBar,
+      CommentBox,
+      Sticky,
+      CommentList,
     },
     data() {
       return {
-        id: this.$route.params.id,
+        id: this.$route.params.id,  //文章id
         articleInfo: "",
+        loadingInstance: null,  //loading对象
+        showCancel: false,
+        comments: [],
+        commentInfo: {
+          type: 1,
+          articleId: this.$route.params.id
+        },
+        toInfo: {},
+        userInfo: {},
       }
     },
     created() {
+      // this.loadingInstance = Loading.service({
+      //   fullscreen: true,
+      //   text: '正在努力加载中~'
+      // });
       this.getArticleById();
+      this.getCommentList();
     },
     methods: {
+      ...mapMutations(['SET_COMMENT_LIST']),
       //通过id获取文章信息
       getArticleById() {
         getArticleById(this.id).then(resp => {
           this.articleInfo = resp.data;
           console.log(resp.data);
+        })
+      },
+      submitBox(e) {
+        let params = {};
+        params.articleId = e.articleId;
+        params.type = e.type;
+        params.userId = e.userId;
+        params.content = e.content;
+        addComment(params).then(resp => {
+          if(resp.code === 200) {
+            this.$notify({
+              title: '成功',
+              message: "发表成功~",
+              type: 'success',
+              offset: 100
+            });
+          } else {
+              this.$notify.error({
+              title: '错误',
+              message: response.data,
+              offset: 100
+            });
+          }
+          this.getCommentList();
+        })
+      },
+      //获取评论列表
+      getCommentList() {
+        let params = {};
+        params.articleId = this.commentInfo.articleId;
+        params.type = this.commentInfo.type;
+        getCommentList(params).then(resp => {
+          if (resp.code === 200) {
+            this.comments = resp.data;
+            this.SET_COMMENT_LIST(this.comments);
+          }
         })
       },
     },
@@ -77,50 +134,19 @@
     font-weight: 700;
     font-size: 19px;
   }
-  .comment-box {
-    display: flex;
-    padding: 20px 24px;
+  .comment {
     background-color: #fff;
+    overflow:hidden;
+    zoom:1;
   }
-  .user-avatar {
-    display: block;
-    margin-bottom: 30px;
-    width: 50px;
-    height: 50px;
-    margin-right: 15px;
+
+  .comment-list {
+    padding: 0 24px;
   }
-  .user-avatar > img {
-    width: 100%;
-    height: 100%;
-    border-radius: 50%;
-    border: 1px solid #eee;
+
+  .no-comment {
+  width: 100%;
+  text-align: center;
   }
-  .editor {
-    flex-grow: 1;
-  }
-  .editor-input {
-    padding: 12px 16px;
-    width: 95%;
-    border-radius: 4px;
-    background-color: #fafafa;
-    display: inline-block;
-    height: 80px;
-    font-size: 13px;
-    vertical-align: top;
-    resize: none;
-    color: #999;
-    border: 1px solid #eee;
-    outline: none;
-  }
-  .editor > .post {
-    margin-top: 20px;
-    display: flex;
-    justify-content: flex-end;
-  }
-  .editor .post .submit {
-    color: #fff;
-    background-color: #ec7259;
-    border-color: #ec7259;
-    outline: none;
-  }
+  
 </style>

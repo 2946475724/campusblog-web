@@ -54,11 +54,11 @@ service.interceptors.response.use(
   },
   error => {
     console.log('err' + error)// for debug
-    Message({
-      message: error.msg,
-      type: 'error',
-      duration: 3 * 1000
-    })
+    // Message({
+    //   message: error.msg,
+    //   type: 'error',
+    //   duration: 3 * 1000
+    // })
     return Promise.reject(error)
   }
 )

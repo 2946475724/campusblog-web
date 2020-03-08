@@ -24,15 +24,15 @@
       </div>
       <!-- 登录注册按钮 -->
       <div class="user-box">
-        <div v-show="!isLogin">
+        <div v-if="!isLogin">
           <span @click="dialogVisible = !dialogVisible">登录</span>
           <span>|</span>
           <span>注册</span>
         </div>
-        <div class="avatar" v-show="isLogin">
+        <div class="avatar" v-if="isLogin">
           <el-dropdown @command="handleCommand">
             <span class="el-dropdown-link">
-              <el-avatar shape="circle" src="../static/images/default.jpg"></el-avatar>
+              <el-avatar shape="circle" :src="getUserAvatar"></el-avatar>
             </span>
             <el-dropdown-menu slot="dropdown">
               <el-dropdown-item command="gotoUserInfo">主页</el-dropdown-item>
@@ -66,14 +66,17 @@
 <script>
   import { Loading } from 'element-ui';
   import {setSupport,getSupport,setCookie,getCookie} from '@/utils/support';
-  import { getToken, setToken, removeToken } from '@/utils/auth'
+  import { getToken, setToken, removeToken } from '@/utils/auth';
+  import {authVerify} from '@/api/user'
+  import {mapMutations} from 'vuex';
+  import {mapGetters} from 'vuex';
   export default {
     name: 'Top',
     data() {
       return {
         dialogVisible: false,
         isLogin: false,
-        user: {
+        user: {   //登录表单信息
           username: "",
           password: "",
         },
@@ -86,11 +89,19 @@
     created() {
       this.getToken();
     },
+    computed: {
+      ...mapGetters(['getUserAvatar']),
+    },
     methods: {
+      //判断是否有token，获取用户信息
       getToken() {
         let token = getToken('loginToken');
         if(token != undefined) {
           this.isLogin = true;
+          authVerify(token).then(resp => {
+            this.$store.commit('SET_LOGIN_STATE', true);
+            this.$store.commit('SET_USER_INFO', resp.data);
+          })
         }
       },
       //登录
@@ -99,8 +110,6 @@
           if(valid) {
             this.$store.dispatch('Login', this.user).then(() => {
               this.loading = false;
-              setCookie("username", this.user.username,15);
-              setCookie("password", this.user.password,15);
               this.isLogin = true;
               this.dialogVisible = !this.dialogVisible;
             }).catch(() => {
