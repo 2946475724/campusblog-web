@@ -22,6 +22,9 @@
       <div class="search-box">
         <svg-icon icon-class="search" class="color-main"></svg-icon>
       </div>
+      <div class="editor">
+        <router-link to="/editor"><a href="javascript:void(0);">写文章</a></router-link>
+      </div>
       <!-- 登录注册按钮 -->
       <div class="user-box">
         <div v-if="!isLogin">
@@ -192,6 +195,11 @@
   }
 
   .search-box {}
+
+  .editor {
+    width: 100px;
+    cursor: pointer;
+  }
 
   .user-box {
     width: 100px;

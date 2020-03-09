@@ -3,6 +3,7 @@ import Router from 'vue-router'
 import Index from '@/views/index'
 import Info from '@/views/info'
 import User from '@/views/user'
+import Editor from '@/views/editor'
 
 Vue.use(Router)
 
@@ -29,6 +30,11 @@ export const constantRouterMap = [
     path: '/user',
     name: 'user',
     component: User
+  },
+  {
+    path: '/editor',
+    name: 'Editor',
+    component: Editor
   },
 ] 
 
