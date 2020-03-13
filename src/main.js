@@ -20,6 +20,8 @@ Vue.use(mavonEditor)
 
 import '@/icons' // 引入svg
 
+import '@/permission'
+
 import '../static/css/index.css'
 
 import moment from 'moment'  //导入时间格式化组件

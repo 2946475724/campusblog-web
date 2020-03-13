@@ -51,7 +51,7 @@ const user = {
       const username = userInfo.username.trim();
       return new Promise((resolve, reject) => {
         login(username, userInfo.password).then(resp => {
-          const token = resp.data.token;
+          const token = resp.data.tokenHead + resp.data.token;
           setToken(token);
           commit('SET_TOKEN', token);
           commit('SET_USER_INFO', resp.data.userInfo);
@@ -83,3 +83,4 @@ const user = {
 }
 
 export default user
+

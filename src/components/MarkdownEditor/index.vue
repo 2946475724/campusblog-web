@@ -1,30 +1,65 @@
 <template>
   <div class="app-container">
-    <el-form :label-position="'left'" :model="article" :rules="rules" label-width="60px">
-      <el-form-item label="标 题" prop="title">
-        <el-input v-model="article.title"></el-input>
+    <el-form :label-position="'left'" :model="article" :rules="rules" ref="article" label-width="80px">
+      <el-form-item label="文章标题" prop="title">
+        <el-input v-model="article.title" placeholder="请输入文章标题"></el-input>
       </el-form-item>
     </el-form>
     <mavon-editor ref="md" @save="save" @imgAdd="imgAdd" @imgDel="imgDel" v-model="article.content"
       :codeStyle="markdown.codeStyle" :toolbars="markdown.toolbars" />
     <br>
-    <el-row>
-      <el-col :span="2">
-        <el-button @click="goback">返 回</el-button>
+    <el-row type="flex" justify="end">
+      <el-col :span="1">
+        <el-button @click="goback" >返 回</el-button>
       </el-col>
-      <el-col :span="2" :offset="20">
-        <el-button type="primary" style="float: right;" @click="save">保 存</el-button>
+      <el-col :span="2">
+        <el-button type="primary" style="float: right;" @click="dialogVisible=true">保 存</el-button>
       </el-col>
     </el-row>
+    <el-dialog title="发布文章" :visible.sync="dialogVisible" width="30%" >
+      <el-form :model="article">
+        <el-form-item label="封面图片">
+          <el-upload class="upload-demo" action="https://jsonplaceholder.typicode.com/posts/"
+            :on-preview="handlePreview" :on-remove="handleRemove" :file-list="fileList" list-type="picture">
+            <el-button size="small" type="primary">点击上传</el-button>
+          </el-upload>
+        </el-form-item>
+        <el-form-item label="文章分类">
+          <el-select v-model="name" placeholder="请选择">
+            <el-option v-for="item in categories" :key="item.id" :label="item.name" :value="item.name">
+            </el-option>
+          </el-select>
+        </el-form-item>
+        <el-form-item label="文章标签">
+          <el-tag :key="tag" v-for="tag in dynamicTags" closable :disable-transitions="false" @close="handleClose(tag)">
+            {{tag}}
+          </el-tag>
+          <el-input class="input-new-tag" v-if="inputVisible" v-model="inputValue" ref="saveTagInput" size="small"
+            @keyup.enter.native="handleInputConfirm" @blur="handleInputConfirm">
+          </el-input>
+          <el-button v-else class="button-new-tag" size="small" @click="showInput">+ 添加标签</el-button>
+        </el-form-item>
+        <el-form-item label="是否发布">
+          <el-radio-group v-model="article.status">
+            <el-radio :label="1">是</el-radio>
+            <el-radio :label="0">否</el-radio>
+          </el-radio-group>
+        </el-form-item>
+      </el-form>
+      <span slot="footer" class="dialog-footer">
+        <el-button @click="dialogVisible = false">取 消</el-button>
+        <el-button type="primary" @click="dialogVisible = false">保存</el-button>
+      </span>
+    </el-dialog>
   </div>
 </template>
 
 <script>
   import {
     addArticle,
-    uploadImage
+    uploadImage,
   } from '@/api/article'
-
+  import {getList} from '@/api/category'
   export default {
     data() {
       return {
@@ -71,8 +106,14 @@
           title: "",
           content: '',
           contentHtml: null,
-          type: 0
+          status: 1,
+          category: ""
         },
+        categories: [],
+        name: "",
+        dynamicTags: [],
+        inputVisible: false,
+        inputValue: '',
         rules: {
           title: [{
               required: true,
@@ -88,11 +129,14 @@
           ]
         },
         // lastSaveTime: null,
-        timer: null
+        timer: null,
+        dialogVisible: false,
       }
     },
     created() {
+      this.getCategoryList();
       this.getArticle()
+      
     },
     mounted() {
       this.timer = setInterval(this.intervalSave, 2 * 60 * 1000);
@@ -101,21 +145,22 @@
       clearInterval(this.timer);
     },
     methods: {
-      getArticle() { //获取文章内容
-        let id = this.$route.query.a
-        if (id == null) {
-          this.markdownForm.contentMarkdown = ''
-        } else {
-          getMarkdownArticle(id).then(r => {
-            this.markdownForm.contentMarkdown = r.data.contentMarkdown == null ? '' : r.data.contentMarkdown
-            this.markdownForm.articleId = r.data.articleId
-            this.markdownForm.title = r.data.title
-            this.markdownForm.type = r.data.type
-          }).catch(e => {
-            console.log(e)
-          })
-        }
-      },
+      //获取文章内容
+      // getArticle() { 
+      //   let id = this.$route.query.a
+      //   if (id == null) {
+      //     this.markdownForm.contentMarkdown = ''
+      //   } else {
+      //     getMarkdownArticle(id).then(r => {
+      //       this.markdownForm.contentMarkdown = r.data.contentMarkdown == null ? '' : r.data.contentMarkdown
+      //       this.markdownForm.articleId = r.data.articleId
+      //       this.markdownForm.title = r.data.title
+      //       this.markdownForm.type = r.data.type
+      //     }).catch(e => {
+      //       console.log(e)
+      //     })
+      //   }
+      // },
       //保存文章内容
       save() { 
         console.log(this.article)
@@ -149,7 +194,36 @@
       imgDel(pos, url) { //删除图片，并不是修改就会触发，仅支持工具栏操作
         console.log(pos)
         console.log(url)
-      }
+      },
+      //获取文章分类
+      getCategoryList() {
+        getList().then(resp => {
+          console.log(resp.data)
+          this.categories = resp.data
+        })
+      },
+      //标签输入
+      handleClose(tag) {
+        this.dynamicTags.splice(this.dynamicTags.indexOf(tag), 1);
+      },
+      showInput() {
+        this.inputVisible = true;
+        this.$nextTick(_ => {
+        this.$refs.saveTagInput.$refs.input.focus();
+      });
+      },
+      handleInputConfirm() {
+        let inputValue = this.inputValue;
+        if (inputValue) {
+        this.dynamicTags.push(inputValue);
+        }
+        this.inputVisible = false;
+        this.inputValue = '';
+      },
+      //返回
+      goback() {
+        this.$router.go(-1);
+      },
     }
   }
 
@@ -160,8 +234,22 @@
     margin: 20px 30px;
   }
   /* 设置编辑框最小高度 */
-  .v-note-panel.shadow { 
-    min-height: 500px;   
+  .v-note-wrapper.shadow {
+    min-height: 600px;   
   }
-
+  .el-tag + .el-tag {
+    margin-left: 10px;
+  }
+  .button-new-tag {
+    /* margin-left: 10px; */
+    height: 32px;
+    line-height: 30px;
+    padding-top: 0;
+    padding-bottom: 0;
+  }
+  .input-new-tag {
+    width: 90px;
+    margin-left: 10px;
+    vertical-align: bottom;
+  }
 </style>

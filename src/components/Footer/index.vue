@@ -1,17 +1,11 @@
 <template>
-  <div>
-    <Top></Top>
-    个人中心
+  <div class="footer">
+    
   </div>
 </template>
 
 <script>
-  import Top from '@/components/Top'
   export default {
-    name: 'user',
-    components: {
-      Top,
-    },
     data() {
       return {
         
@@ -21,5 +15,9 @@
 </script>
 
 <style>
-
+  .footer {
+    height: 150px;
+    margin-top: 20px;
+    background-color: #fff;
+  }
 </style>

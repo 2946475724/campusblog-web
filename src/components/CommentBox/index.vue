@@ -100,7 +100,7 @@
 
 </script>
 
-<style>
+<style scope>
   .comment-box {
     display: flex;
     padding: 20px 24px;
@@ -122,7 +122,7 @@
     border: 1px solid #eee;
   }
 
-  .editor {
+  .comment-box .editor {
     flex-grow: 1;
   }
 

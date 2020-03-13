@@ -101,7 +101,7 @@
         let token = getToken('loginToken');
         if(token != undefined) {
           this.isLogin = true;
-          authVerify(token).then(resp => {
+          authVerify(token.slice(6)).then(resp => {
             this.$store.commit('SET_LOGIN_STATE', true);
             this.$store.commit('SET_USER_INFO', resp.data);
           })
@@ -194,9 +194,8 @@
     list-style: none;
   }
 
-  .search-box {}
-
   .editor {
+    display: b;
     width: 100px;
     cursor: pointer;
   }

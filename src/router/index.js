@@ -29,11 +29,17 @@ export const constantRouterMap = [
   {
     path: '/user',
     name: 'user',
+    meta: {
+      requireAuth: true
+    },
     component: User
   },
   {
     path: '/editor',
     name: 'Editor',
+    meta: {
+      requireAuth: true
+    },
     component: Editor
   },
 ] 

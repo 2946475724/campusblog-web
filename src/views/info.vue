@@ -1,6 +1,6 @@
 <template>
   <div>
-    <top></top>
+    <Top></Top>
     <div class="main-container">
       <div class="main-content">
         <article class="info">

@@ -38,11 +38,13 @@
       <SideBar></SideBar>
     </div>
     <ScrollTop></ScrollTop>
+    <Footer></Footer>
   </div>
 </template>
 
 <script>
   import Top from "../components/Top";
+  import Footer from '../components/Footer'
   import SideBar from "../components/SideBar";
   import ScrollTop from '../components/ScrollTop';
   import { fetchList } from "@/api/article";
@@ -52,6 +54,7 @@
       Top,
       SideBar,
       ScrollTop,
+      Footer,
     },
     data() {
       return {
