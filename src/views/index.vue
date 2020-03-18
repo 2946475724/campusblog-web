@@ -26,6 +26,10 @@
                     <span>{{article.views === null ? 0 : article.views}}</span>
                   </span>
                   <span class="views">
+                    <i class="el-icon-chat-dot-round"></i>
+                    <span>{{article.comment}}</span>
+                  </span>
+                  <span class="views">
                     <svg-icon icon-class="category" class="color-main"></svg-icon>
                     <span>{{article.categoryName}}</span>
                   </span>

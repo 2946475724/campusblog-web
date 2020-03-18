@@ -14,9 +14,16 @@ export function getArticleById(params) {
   })
 }
 
+export function getHotArticle() {
+  return request({
+    url: `/api/index/getHotArticle`,
+    method: 'get',
+  })
+}
+
 export function addArticle(data) {
   return request({
-    url: '/api/article/add',
+    url: '/article/add',
     method: 'post',
     data: data
   })

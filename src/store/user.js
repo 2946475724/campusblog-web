@@ -25,9 +25,7 @@ const user = {
     getUserAvatar(state) {
       if (state.isLogin && state.userInfo.icon != undefined) {
         return state.userInfo.icon;
-      } else {
-        return "/static/images/default.jpg"
-      }
+      } 
     }
   },
 

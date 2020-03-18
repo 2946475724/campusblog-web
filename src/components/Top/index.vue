@@ -28,14 +28,14 @@
       <!-- 登录注册按钮 -->
       <div class="user-box">
         <div v-if="!isLogin">
-          <span @click="dialogVisible = !dialogVisible">登录</span>
+          <span @click="gotoLogin">登录</span>
           <span>|</span>
-          <span>注册</span>
+          <span @click="gotoSignUp">注册</span>
         </div>
         <div class="avatar" v-if="isLogin">
           <el-dropdown @command="handleCommand">
             <span class="el-dropdown-link">
-              <el-avatar shape="circle" :src="getUserAvatar"></el-avatar>
+              <el-avatar :size="small" icon="el-icon-user-solid" :src="getUserAvatar"></el-avatar>
             </span>
             <el-dropdown-menu slot="dropdown">
               <el-dropdown-item command="gotoUserInfo">主页</el-dropdown-item>
@@ -44,22 +44,48 @@
           </el-dropdown>     
         </div>
       </div>
-      <!-- 弹出登录框 -->
-      <el-dialog title="登录" width="30%" :visible.sync="dialogVisible" :append-to-body='true' :lock-scroll="false" center>
-        <el-form label-width="80px" label-position="right" :model="user" :rules="rules" ref="user">
-          <el-form-item label="用户名" prop="username">
-            <el-input v-model="user.username"></el-input>
-          </el-form-item>
-          <el-form-item label="密码" prop="password">
-            <el-input type="password" v-model="user.password" auto-complete="new-password"></el-input>
-          </el-form-item>
-          <!-- <span class="pwd">
-              <a href="">忘记密码？</a>
-              <a href="">还没账号,注册一个</a>
-            </span> -->
-        </el-form>
-        <div slot="footer" class="dialog-footer">
-          <el-button type="primary" @click="handleLogin('user')">登 录</el-button>
+      
+      <el-dialog width="23%" :visible.sync="dialogVisible" :append-to-body='true' :lock-scroll="false">
+        <!-- 弹出登录框 -->
+        <div v-if="loginVisible" class="login-box">
+          <span slot="title" class="login-box-title">
+            <h2>登录</h2>
+            <span class="login-tip">没有账号? 请点击 <span class="login-tip-click"
+                @click="gotoSignUp">注册</span></span>
+          </span>
+          <el-form label-width="80px" label-position="right" :model="user" :rules="rules" ref="user" class="login-box-form">
+            <el-form-item label="用户名" prop="username">
+              <el-input v-model="user.username"></el-input>
+            </el-form-item>
+            <el-form-item label="密码" prop="password">
+              <el-input type="password" v-model="user.password" auto-complete="new-password"></el-input>
+            </el-form-item>
+            <span class="remember-pwd">
+              <el-checkbox v-model="checked">自动登录</el-checkbox>
+              <a href="">忘记密码</a>
+            </span>
+          </el-form>
+          <div slot="footer" class="dialog-footer">
+            <el-button class="login-button" type="primary" @click="handleLogin('user')">登 录</el-button>
+          </div>
+        </div>
+        <!-- 弹出注册框 -->
+        <div v-else>
+          <span slot="title" class="login-box-title">
+            <h2>注册</h2>
+            <span class="login-tip">已有账号? 请点击 <span class="login-tip-click" @click="gotoLogin">登录</span></span>
+          </span>
+          <el-form label-width="80px" label-position="right" :model="user" :rules="rules" ref="user" class="login-box-form">
+            <el-form-item label="用户名" prop="username">
+              <el-input v-model="user.username"></el-input>
+            </el-form-item>
+            <el-form-item label="密码" prop="password">
+              <el-input type="password" v-model="user.password" auto-complete="new-password"></el-input>
+            </el-form-item>
+          </el-form>
+          <div slot="footer" class="dialog-footer">
+            <el-button class="login-button" type="primary" @click="handleSignUp('user')">注 册</el-button>
+          </div>
         </div>
       </el-dialog>
     </header>
@@ -77,6 +103,7 @@
     name: 'Top',
     data() {
       return {
+        loginVisible: false,
         dialogVisible: false,
         isLogin: false,
         user: {   //登录表单信息
@@ -87,6 +114,7 @@
           username: [{ required: true, message: '请输入用户名', trigger: 'blur' },],
           password: [{ required: true, message: '请输入密码', trigger: 'blur' },]
         },
+        checked: true, // 自动登录
       };
     },
     created() {
@@ -114,7 +142,7 @@
             this.$store.dispatch('Login', this.user).then(() => {
               this.loading = false;
               this.isLogin = true;
-              this.dialogVisible = !this.dialogVisible;
+              this.dialogVisible = false
             }).catch(() => {
               this.loading = false
             })
@@ -122,7 +150,9 @@
             return false;
           }
         })
-        
+      },
+      handleSignUp() {
+
       },
       handleCommand(command) {
         console.log(command);
@@ -133,10 +163,19 @@
           case "logout":
             this.handleLogOut();
             break;
-        
           default:
             break;
         }
+      },
+      //跳转注册
+      gotoSignUp() {
+        this.dialogVisible = true
+        this.loginVisible = false
+      },
+      //跳转登录
+      gotoLogin() {
+        this.dialogVisible = true
+        this.loginVisible = true
       },
       //登出
       handleLogOut() {
@@ -194,7 +233,7 @@
     list-style: none;
   }
 
-  .editor {
+  .header .editor {
     display: b;
     width: 100px;
     cursor: pointer;
@@ -212,7 +251,43 @@
     height: 50px;
     border-radius: 50%;
   }
+  .login-box {
+    transition-property: width;
+    transition-duration: 1s;
+    transition-timing-function: linear;
+    transition-delay: 2s;
+  }
+  .login-box-title h2{
+    color: #27282d;
+    font-size: 22px;
+    height: 30px;
+    line-height: 30px;
+    font-weight: 700;
+    margin-bottom: 10px;
+  }
+  .login-tip {
+    font-size: 12px;
+    color: #27282d;
+  }
+  .login-tip-click {
+    color: #27282d;
+    font-weight: 700;
+    cursor: pointer;
+    padding-left: 4px;
+  }
+  .login-box-form {
+    margin: 20px 0;
+  }
+  .remember-pwd {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+  }
   .dialog-footer {
     text-align: center;
+    margin-bottom: 80px;
+  }
+  .login-button {
+    width: 100%;
   }
 </style>

@@ -6,13 +6,14 @@
         <article class="info">
           <div class="detail">
             <h2 class="title">{{articleInfo.title}}</h2>
-            <div class="article-content">{{articleInfo.content}}</div>
+            <div class="article-content markdown-body" codeStyle="monokai" v-html="articleInfo.contentHtml">
+              {{articleInfo.contentHtml}}
+            </div>
           </div>
           <div class="comment" style="background-color: #fff;">
-            <!-- <sticky :sticky-top="60"> -->
-              <CommentBox :userInfo="userInfo" :commentInfo="commentInfo" @submit-box="submitBox"
-                :showCancel="showCancel"></CommentBox>
-            <!-- </sticky> -->
+            <!-- 评论输入框 -->
+            <CommentBox :userInfo="userInfo" :commentInfo="commentInfo" @submit-box="submitBox" :showCancel="showCancel"></CommentBox>
+            <!-- 评论回复列表 -->
             <div class="comment-list">
               <CommentList :comments="comments" :commentInfo="commentInfo"></CommentList>
               <div class="no-comment" v-if="comments.length ==0">
@@ -24,6 +25,7 @@
       </div>
       <SideBar></SideBar>
     </div>
+    <Footer></Footer>
   </div>
 </template>
 
@@ -32,19 +34,20 @@
   import SideBar from "../components/SideBar";
   import CommentBox from '../components/CommentBox';
   import CommentList from '../components/CommentList';
-  import Sticky from '../components/Sticky'
+  import Footer from '../components/Footer'
   import {getArticleById} from '@/api/article';
   import {mapMutations} from 'vuex'
   import {addComment, getCommentList} from "../api/comment";
   import { Loading } from 'element-ui';
+  import "mavon-editor/dist/css/index.css";
   export default {
     name: 'Info',
     components: {
       Top,
       SideBar,
       CommentBox,
-      Sticky,
       CommentList,
+      Footer,
     },
     data() {
       return {
@@ -121,7 +124,7 @@
 
 <style>
   .detail {
-    padding: 5px 20px;
+    padding: 5px 30px 30px;
     overflow: hidden;
     height: auto;
     transition: height .25;
@@ -132,7 +135,7 @@
     margin: 16px 0 25px;
     text-align: center;
     font-weight: 700;
-    font-size: 19px;
+    font-size: 25px;
   }
   .comment {
     background-color: #fff;

@@ -5,7 +5,7 @@
         <el-input v-model="article.title" placeholder="请输入文章标题"></el-input>
       </el-form-item>
     </el-form>
-    <mavon-editor ref="md" @save="save" @imgAdd="imgAdd" @imgDel="imgDel" v-model="article.content"
+    <mavon-editor ref="md" @change="change" @imgAdd="imgAdd" @imgDel="imgDel" v-model="article.content"
       :codeStyle="markdown.codeStyle" :toolbars="markdown.toolbars" />
     <br>
     <el-row type="flex" justify="end">
@@ -13,19 +13,19 @@
         <el-button @click="goback" >返 回</el-button>
       </el-col>
       <el-col :span="2">
-        <el-button type="primary" style="float: right;" @click="dialogVisible=true">保 存</el-button>
+        <el-button type="primary" style="float: right;" @click="dialogVisible=true">发 布</el-button>
       </el-col>
     </el-row>
     <el-dialog title="发布文章" :visible.sync="dialogVisible" width="30%" >
       <el-form :model="article">
         <el-form-item label="封面图片">
-          <el-upload class="upload-demo" action="https://jsonplaceholder.typicode.com/posts/"
-            :on-preview="handlePreview" :on-remove="handleRemove" :file-list="fileList" list-type="picture">
+          <el-upload :action="upLoadUrl"
+            :on-success="handleSuccess" :file-list="fileList" name="image" list-type="picture">
             <el-button size="small" type="primary">点击上传</el-button>
           </el-upload>
         </el-form-item>
         <el-form-item label="文章分类">
-          <el-select v-model="name" placeholder="请选择">
+          <el-select v-model="name" size="small" @change="selectChange" placeholder="请选择">
             <el-option v-for="item in categories" :key="item.id" :label="item.name" :value="item.name">
             </el-option>
           </el-select>
@@ -40,7 +40,7 @@
           <el-button v-else class="button-new-tag" size="small" @click="showInput">+ 添加标签</el-button>
         </el-form-item>
         <el-form-item label="是否发布">
-          <el-radio-group v-model="article.status">
+          <el-radio-group @change="radioChange" v-model="article.status">
             <el-radio :label="1">是</el-radio>
             <el-radio :label="0">否</el-radio>
           </el-radio-group>
@@ -48,7 +48,7 @@
       </el-form>
       <span slot="footer" class="dialog-footer">
         <el-button @click="dialogVisible = false">取 消</el-button>
-        <el-button type="primary" @click="dialogVisible = false">保存</el-button>
+        <el-button type="primary" @click="publish" >发 布</el-button>
       </span>
     </el-dialog>
   </div>
@@ -102,12 +102,15 @@
           }
         },
         article: {
-          articleId: null,
+          articleId: "",
+          userId: "",
           title: "",
+          coverImage: "",
           content: '',
-          contentHtml: null,
+          contentHtml: "",
+          tags: "",
           status: 1,
-          category: ""
+          categoryId: ""
         },
         categories: [],
         name: "",
@@ -128,21 +131,15 @@
             }
           ]
         },
-        // lastSaveTime: null,
-        timer: null,
         dialogVisible: false,
+        upLoadUrl: "http://localhost:8081/file/uploadImage",
+        fileList: [],
       }
     },
     created() {
       this.getCategoryList();
-      this.getArticle()
+      // this.getArticle()
       
-    },
-    mounted() {
-      this.timer = setInterval(this.intervalSave, 2 * 60 * 1000);
-    },
-    beforeDestroy() {
-      clearInterval(this.timer);
     },
     methods: {
       //获取文章内容
@@ -161,35 +158,20 @@
       //     })
       //   }
       // },
-      //保存文章内容
-      save() { 
-        console.log(this.article)
-        // saveMarkdownArticle(this.markdownForm).then(resp => {
-        //   this.$message.success("保存成功")
-        //   this.markdownForm.articleId = resp.data.articleId
-        //   this.lastSaveTime = new Date()
-        // }).catch(e => {
-        //   console.log(e)
-        // })
+      //实时获取转成HTML的数据
+      change(value, render) {
+        this.article.contentHtml = render
+        console.log(this.article.contentHtml)
       },
-      //添加图片，pos为位置
+      //将图片上传到服务器，返回地址替换到md中，pos为位置
       imgAdd(pos, file) { 
         let formData = new FormData();
         formData.append('image', file);
         uploadImage(formData).then(resp => {
           console.log(resp);
+          //将返回的url替换到文本原位置
+          this.$refs.md.$img2Url(pos, resp.data)
         })
-
-        $vm = this.$refs.md
-        markdownImg.base64Data = file.miniurl //获取图片base64内容
-        markdownImg.type = file.type
-        
-        // uploadImg(markdownImg).then(r => {
-        //   console.log(r)
-        //   $vm.$img2Url(pos, process.env.VUE_APP_BASE_API + '/img/' + r.data)
-        // }).catch(e => {
-        //   console.log(e)
-        // })
       },
       imgDel(pos, url) { //删除图片，并不是修改就会触发，仅支持工具栏操作
         console.log(pos)
@@ -201,6 +183,25 @@
           console.log(resp.data)
           this.categories = resp.data
         })
+      },
+      //返回
+      goback() {
+        this.$router.go(-1);
+      },
+      //封面图片上传成功
+      handleSuccess(response, file, fileList) {
+        console.log(response);
+        this.article.coverImage = response.data;
+      },
+      //选中的改变事件
+      selectChange(value) {
+        console.log(value);
+        for (let i = 0; i < this.categories.length; i++) {
+          if (this.categories[i].name === value) {
+            this.article.categoryId = this.categories[i].id;
+            console.log(this.article.categoryId);
+          }
+        }
       },
       //标签输入
       handleClose(tag) {
@@ -215,14 +216,24 @@
       handleInputConfirm() {
         let inputValue = this.inputValue;
         if (inputValue) {
-        this.dynamicTags.push(inputValue);
+          this.dynamicTags.push(inputValue);
         }
         this.inputVisible = false;
         this.inputValue = '';
       },
-      //返回
-      goback() {
-        this.$router.go(-1);
+      radioChange(value) {
+        console.log(value)
+        this.article.status = value
+      },
+      //发布文章
+      publish() {
+        this.dialogVisible = false;
+        this.article.userId = this.$store.state.user.userInfo.id;
+        this.article.tags = this.dynamicTags.join(',');
+        console.log("上传内容：",this.article);
+        addArticle(this.article).then(resp => {
+          console.log(resp)
+        })
       },
     }
   }

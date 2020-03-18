@@ -1,7 +1,7 @@
 <template>
   <div class="comment-box">
     <div class="user-avatar"> 
-      <img :src="getUserAvatar" />
+      <el-avatar size="small" icon="el-icon-user-solid" :src="getUserAvatar"></el-avatar>
     </div>
     <div class="editor">
       <textarea class="editor-input" placeholder="说点什么吧..." v-model="value" @input="vaildCount"></textarea>
@@ -95,6 +95,11 @@
         this.count = 255;
         this.$emit("submit-box", this.comments);
       },
+      handleCancel() {
+        this.value = '';
+        this.count = 255;
+        this.$emit("cancel-box", this.toInfo.commentUid)
+      }
     },
   }
 
@@ -108,18 +113,8 @@
   }
 
   .user-avatar {
-    display: block;
-    margin-bottom: 30px;
-    width: 50px;
     height: 50px;
-    margin-right: 15px;
-  }
-
-  .user-avatar>img {
-    width: 100%;
-    height: 100%;
-    border-radius: 50%;
-    border: 1px solid #eee;
+    margin-right: 10px;
   }
 
   .comment-box .editor {

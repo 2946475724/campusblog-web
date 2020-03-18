@@ -2,13 +2,12 @@
   <div>
     <div v-for="item in comments" :key="item.id">
       <div class="commentList">
-        <span class="left p1">
-          <img v-if="item.user"
-            :src="item.user.icon ? item.user.icon:'/static/images/default.jpg'" />
-          <img v-else src="/static/images/default.jpg" />
+        <span class="left">
+          <el-avatar v-if="item.user" icon="el-icon-user-solid" size="small" :src="item.user.icon">
+          </el-avatar>
         </span>
 
-        <span class="right p1">
+        <span class="right">
           <div class="rightTop" v-if="item.user">
             <el-link class="userName" :underline="false">{{item.user.username}}</el-link>
             <span class="timeAgo">{{item.createTime | dateFormat}}</span>
@@ -19,14 +18,13 @@
           </div>
 
           <div class="rightBottom">
-            <el-link class="b1" :underline="false" @click="replyTo(item)">回复</el-link>
+            <el-link class=" b1" :underline="false" @click="replyTo(item)">回复</el-link>
             <el-link class="b1" :underline="false" @click="delComment(item)">删除</el-link>
           </div>
-
+          <CommentBox class="reply-input" :userInfo="userInfo" :toInfo="toInfo" :id="item.id"
+            :commentInfo="commentInfo" @submit-box="submitBox" @cancel-box="cancelBox"></CommentBox>
+          
           <div class="rightCommentList">
-            <CommentBox class="comment" :userInfo="userInfo" :toInfo="toInfo" :id="item.id" :commentInfo="commentInfo"
-              @submit-box="submitBox" @cancel-box="cancelBox"></CommentBox>
-
             <CommentList class="commentStyle" :id="'commentStyle:' + item.id" :comments="item.replyList"
               :commentInfo="commentInfo"></CommentList>
           </div>
@@ -82,27 +80,27 @@
           });
           return
         }
-        let userId = item.userId;
-        let commentId = item.Id;
-        var lists = document.getElementsByClassName("comment");
-        for (var i = 0; i < lists.length; i++) {
-          lists[i].style.display = 'none';
+        var list = document.getElementsByClassName("reply-input");
+        for (var i = 0; i < list.length; i++) {
+          list[i].style.display = 'none';
         }
-        document.getElementById(commentId).style.display = 'block';
-        this.toInfo.commentId = commentId
-        this.toInfo.Id = userId
+        document.getElementById(item.id).style.display = 'block';
+        document.getElementById(item.id).childNodes[0].style.display = 'none'
+        this.toInfo.id = item.userId
+        this.toInfo.commentId = item.id
       },
+
       submitBox(e) {
         console.log("添加内容", e)
         let params = {};
         params.userId = e.userId;
         params.content = e.content;
-        params.blogId = e.blogId;
+        params.articleId = e.articleId;
         params.toId = e.toCommentId;
         params.toUserId = e.toUserId;
-        params.source = e.source
+        params.type = e.type
         addComment(params).then(response => {
-          if (response.code == "success") {
+          if (response.code == "200") {
             let commentData = response.data
             document.getElementById(commentData.toId).style.display = 'none'
             let comments = this.$store.state.app.commentList;
@@ -141,6 +139,7 @@
         });
       },
       cancelBox(toCommentId) {
+        console.log(toCommentId)
         document.getElementById(toCommentId).style.display = 'none'
       },
       taggleAll: function (item) {
@@ -300,36 +299,24 @@
     display: block;
     margin-top: 10px;
     margin-left: 10px;
-    border-left: 1px dashed SlateGray;
   }
 
-  .comment {
+  .reply-input {
     display: none;
   }
 
   .commentList {
     width: 100%;
     margin: 0 auto;
-  }
-
-  .commentList .p1 {
-    float: left;
+    display: flex;
+    flex-direction: row;
   }
 
   .commentList .left {
-    display: inline-block;
-    width: 4%;
-    height: 100%;
-  }
-
-  .commentList .left img {
-    margin: 0 auto;
-    width: 100%;
-    border-radius: 50%;
+    height: 50px;
   }
 
   .commentList .right {
-    display: inline-block;
     width: 95%;
     margin-left: 5px;
   }
@@ -353,16 +340,15 @@
 
   .commentList .rightCenter {
     margin-left: 20px;
-    height: 50px;
+    margin-bottom: 10px;
+    font-size: 14px;
+    color: #505050;
   }
 
   .commentList .rightBottom {
     margin-left: 10px;
     height: 30px;
   }
-
-  .commentList .rightBottom el-link {}
-
   .commentList .rightBottom .b1 {
     margin-left: 10px;
   }
