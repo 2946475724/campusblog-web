@@ -348,6 +348,7 @@
   .commentList .rightBottom {
     margin-left: 10px;
     height: 30px;
+    font-size: 12px;
   }
   .commentList .rightBottom .b1 {
     margin-left: 10px;

@@ -139,6 +139,7 @@
 
   .item-body {
     margin-left: 10px;
+    width: 100%;
   }
 
   .item-title {

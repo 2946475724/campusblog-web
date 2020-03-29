@@ -124,21 +124,18 @@
   .item-pic {
     width: 200px;
     height: 150px;
-    overflow: hidden;
   }
 
-  .item-pic img {
+  .item-pic:hover img {
     width: 200px;
     height: 150px;
     transition: all 0.6s ease;
-  }
-
-  .item-pic img:hover {
     transform: scale(1.1);
   }
 
   .item-body {
     margin-left: 10px;
+    width: 100%;
   }
 
   .item-title {

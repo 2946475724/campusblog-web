@@ -14,21 +14,37 @@
           </ul>
         </div>   
       </div>
+      <div class="aside-tag">
+        <div class="title">
+          <svg-icon icon-class="tag" class="color-main"></svg-icon>
+          <span class="hot">标签云</span>
+        </div>
+        <div class="tag-content">
+          <div class="tag-list">
+            <ul>
+              <li v-for="item in tags" :key="item.id"><a href="#">{{item.name}}</a></li>
+            </ul>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </template>
 
 <script>
   import {getHotArticle} from '@/api/article'
+  import {getTagList} from '@/api/tag'
   export default {
     name: "SideBar",
     data() {
       return {
         hotArticles: [],
+        tags: [],
       }
     },
     created() {
       this.getHotArticle();
+      this.getTagList();
     },
     filters: {
       formatStr(value) {
@@ -39,6 +55,7 @@
       }
     },
     methods: {
+      //获取热门文章
       getHotArticle() {
         getHotArticle().then(resp => {
           console.log(resp.data)
@@ -52,6 +69,14 @@
           path: `/info/${id}`,
         })
       },
+      getTagList() {
+        console.log(111111111111111)
+        getTagList().then(resp => {
+          console.log(resp.data)
+          this.tags = resp.data
+        })
+      },
+
     },
   }
 
@@ -61,9 +86,9 @@
   .sidebar {
     width: 300px;
     margin-left: 10px;
-    background-color: #fff;
   }
   .sidebar .aside-article {
+    background-color: #ffffff;
     overflow: hidden;
   }
   .aside-article .title {
@@ -87,5 +112,46 @@
   .hot {
     font-size: 16px;
     font-weight: 600;
+  }
+  .aside-tag {
+    overflow: hidden;
+    margin-top: 20px;
+    background-color: #fff;
+  }
+  .aside-tag .title {
+    height: 30px;
+    line-height: 30px;
+    padding: 10px 16px;
+    border-bottom: 1px solid #eee;
+    text-transform: uppercase;
+  }
+  .tag-content {
+    padding: 25px;
+    overflow: hidden;
+  }
+  .tag-list {
+    text-align: left;
+  }
+  .tag-list ul li {
+    display: inline-block;
+    background: #fefefe none repeat scroll 0 0;
+    border: 1px solid #f0f0f0;
+    height: 30px;
+    line-height: 26px;
+    margin: 0 5px 9px 0;
+    padding: 0 10px;
+    text-transform: uppercase;
+    transition: all 0.4s ease 0s;
+    font-size: 14px;
+  }
+  .tag-list ul li:hover {
+    background: #66cc99 none repeat scroll 0 0;
+  }
+  .tag-list ul li:hover a {
+    color: #fff;
+  }
+  .tag-list ul li a{
+    /* color: #999; */
+    position: relative;
   }
 </style>

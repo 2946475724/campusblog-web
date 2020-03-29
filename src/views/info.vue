@@ -1,14 +1,15 @@
 <template>
   <div>
-    <Top></Top>
+    <NavBar></NavBar>
     <div class="main-container">
       <div class="main-content">
         <article class="info">
           <div class="detail">
             <h2 class="title">{{articleInfo.title}}</h2>
-            <div class="article-content markdown-body" codeStyle="monokai" v-html="articleInfo.contentHtml">
+            <!-- <div class="article-content markdown-body" codeStyle="monokai" v-html="articleInfo.contentHtml">
               {{articleInfo.contentHtml}}
-            </div>
+            </div> -->
+            <mavon-editor style="box-shadow: '';" class="article-content markdown-body" codeStyle="monokai" v-html="articleInfo.contentHtml" />
           </div>
           <div class="comment" style="background-color: #fff;">
             <!-- 评论输入框 -->
@@ -30,7 +31,8 @@
 </template>
 
 <script>
-  import Top from "../components/Top";  
+  import "mavon-editor/dist/css/index.css";
+  import NavBar from "../components/NavBar";
   import SideBar from "../components/SideBar";
   import CommentBox from '../components/CommentBox';
   import CommentList from '../components/CommentList';
@@ -39,11 +41,11 @@
   import {mapMutations} from 'vuex'
   import {addComment, getCommentList} from "../api/comment";
   import { Loading } from 'element-ui';
-  import "mavon-editor/dist/css/index.css";
+  import marked from 'marked'
   export default {
     name: 'Info',
     components: {
-      Top,
+      NavBar,
       SideBar,
       CommentBox,
       CommentList,

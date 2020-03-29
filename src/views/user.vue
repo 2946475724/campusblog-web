@@ -1,6 +1,6 @@
 <template>
   <div>
-    <Top></Top>
+    <NavBar></NavBar>
     <div class="main-container">
       <div class="main-content">
         <div class="user-info">
@@ -45,11 +45,11 @@
 </template>
 
 <script>
-  import Top from '@/components/Top'
+  import NavBar from '@/components/NavBar'
   export default {
     name: 'user',
     components: {
-      Top,
+      NavBar,
     },
     data() {
       return {

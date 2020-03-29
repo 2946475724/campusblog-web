@@ -1,30 +1,34 @@
 <template>
   <div class="app-container">
-    <el-form :label-position="'left'" :model="article" :rules="rules" ref="article" label-width="80px">
+    <el-form :label-position="'left'" :model="article" :rules="rules" ref="article" label-width="90px">
       <el-form-item label="文章标题" prop="title">
         <el-input v-model="article.title" placeholder="请输入文章标题"></el-input>
       </el-form-item>
     </el-form>
-    <mavon-editor ref="md" @change="change" @imgAdd="imgAdd" @imgDel="imgDel" v-model="article.content"
-      :codeStyle="markdown.codeStyle" :toolbars="markdown.toolbars" />
-    <br>
+    <div style="height: 600px; margin-bottom: 20px;">
+      <mavon-editor ref="md" @change="change" @imgAdd="imgAdd" @imgDel="imgDel" v-model="article.content"
+        :codeStyle="markdown.codeStyle" :toolbars="markdown.toolbars"/>
+    </div>
     <el-row type="flex" justify="end">
       <el-col :span="1">
-        <el-button @click="goback" >返 回</el-button>
+        <el-button @click="goback" size="small">返 回</el-button>
       </el-col>
       <el-col :span="2">
-        <el-button type="primary" style="float: right;" @click="dialogVisible=true">发 布</el-button>
+        <el-button type="primary" style="float: right;" @click="dialogVisible=true" size="small">发 布</el-button>
       </el-col>
     </el-row>
     <el-dialog title="发布文章" :visible.sync="dialogVisible" width="30%" >
-      <el-form :model="article">
-        <el-form-item label="封面图片">
+      <el-form :label-position="'left'" :model="article" :rules="rules" ref="article" label-width="90px">
+        <el-form-item label="封面图片" prop="coverImage">
           <el-upload :action="upLoadUrl"
             :on-success="handleSuccess" :file-list="fileList" name="image" list-type="picture">
             <el-button size="small" type="primary">点击上传</el-button>
           </el-upload>
         </el-form-item>
-        <el-form-item label="文章分类">
+        <el-form-item label="文章摘要" prop="summary">
+          <el-input v-model="article.summary" :rows="4" type="textarea" placeholder="请输入摘要..."></el-input>
+        </el-form-item>
+        <el-form-item label="文章分类" prop="categoryId">
           <el-select v-model="name" size="small" @change="selectChange" placeholder="请选择">
             <el-option v-for="item in categories" :key="item.id" :label="item.name" :value="item.name">
             </el-option>
@@ -47,8 +51,8 @@
         </el-form-item>
       </el-form>
       <span slot="footer" class="dialog-footer">
-        <el-button @click="dialogVisible = false">取 消</el-button>
-        <el-button type="primary" @click="publish" >发 布</el-button>
+        <el-button @click="dialogVisible = false" size="small">取 消</el-button>
+        <el-button type="primary" @click="publish('article')" size="small">发 布</el-button>
       </span>
     </el-dialog>
   </div>
@@ -106,6 +110,7 @@
           userId: "",
           title: "",
           coverImage: "",
+          summary: "",
           content: '',
           contentHtml: "",
           tags: "",
@@ -129,7 +134,18 @@
               message: '长度在1到80个字符',
               trigger: 'blur'
             }
-          ]
+          ],
+          coverImage: [
+            {required: true, message: '请选择封面图'}
+          ],
+          summary: [
+            {
+              required: true,
+              message: '请输入摘要',
+              trigger: 'blur'
+            }
+          ],
+          categoryId: [{required: true, message: '请选择文章分类'}]
         },
         dialogVisible: false,
         upLoadUrl: "http://localhost:8081/file/uploadImage",
@@ -226,13 +242,17 @@
         this.article.status = value
       },
       //发布文章
-      publish() {
-        this.dialogVisible = false;
+      publish(article) {
         this.article.userId = this.$store.state.user.userInfo.id;
         this.article.tags = this.dynamicTags.join(',');
         console.log("上传内容：",this.article);
-        addArticle(this.article).then(resp => {
-          console.log(resp)
+        this.$refs[article].validate((valid) => {
+          if (valid) {
+            addArticle(this.article).then(resp => {
+              this.dialogVisible = false;
+              console.log(resp)
+            })
+          }
         })
       },
     }
@@ -240,14 +260,15 @@
 
 </script>
 
-<style lang="scss">
+<style>
   .app-container {
     margin: 20px 30px;
   }
   /* 设置编辑框最小高度 */
   .v-note-wrapper.shadow {
-    min-height: 600px;   
+    height: 600px;   
   }
+  
   .el-tag + .el-tag {
     margin-left: 10px;
   }
