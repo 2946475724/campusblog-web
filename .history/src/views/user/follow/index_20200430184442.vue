@@ -1,0 +1,28 @@
+<template>
+  <div class="follow-box">
+    <div>
+      <ul>
+        <li class="">
+          <el-avatar></el-avatar>
+          <div><el-button type=""></el-button></div>
+        </li>
+      </ul>
+    </div>
+  </div>
+</template>
+
+<script>
+  export default {
+    name: 'follow',
+    data() {
+      return {
+
+      }
+    },
+  }
+
+</script>
+
+<style>
+
+</style>
